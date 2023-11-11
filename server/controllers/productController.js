@@ -82,3 +82,26 @@ export const deleteProduct = async (req, res) => {
     });
   }
 };
+
+// Get Products Details
+export const getProductDetails = async (req, res) => {
+  try {
+    const product = await Products.findById(req.params.id);
+    if (!product) {
+      return res.status(404).send({
+        success: false,
+        message: "Product not found",
+      });
+    }
+    return res.status(200).send({
+      success: true,
+      message: "Single Product Detail Get successfully",
+      product,
+    });
+  } catch (error) {
+    return res.status(500).send({
+      success: false,
+      message: error.message,
+    });
+  }
+};
