@@ -36,3 +36,23 @@ export const getAllProducts = async (req, res) => {
     data: products,
   });
 };
+
+export const updateProduct = async (req, res) => {
+  let product = await Products.findById(req.params.id);
+  if (!product) {
+    return res.status(404).send({
+      success: false,
+      message: "Product not found",
+    });
+  }
+  product = await Products.findByIdAndUpdate(req.params.id, req.body, {
+    new: true,
+    runValidators: true,
+    useFindAndModify: false,
+  });
+  return res.status(200).send({
+    success: true,
+    message: "Product updated successfully",
+    product,
+  });
+};
