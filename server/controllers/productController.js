@@ -1,5 +1,6 @@
 import Products from "../models/productModel.js";
 
+// Create new product
 export const createProduct = async (req, res) => {
   try {
     const product = await Products.create(req.body);
@@ -22,6 +23,8 @@ export const createProduct = async (req, res) => {
   }
 };
 
+// Get all products
+
 export const getAllProducts = async (req, res) => {
   const products = await Products.find({});
   if (!products) {
@@ -37,6 +40,7 @@ export const getAllProducts = async (req, res) => {
   });
 };
 
+// update single product
 export const updateProduct = async (req, res) => {
   let product = await Products.findById(req.params.id);
   if (!product) {
@@ -55,4 +59,26 @@ export const updateProduct = async (req, res) => {
     message: "Product updated successfully",
     product,
   });
+};
+
+//Delete product
+export const deleteProduct = async (req, res) => {
+  try {
+    let product = await Products.findByIdAndDelete(req.params.id);
+    if (!product) {
+      return res.status(404).send({
+        success: false,
+        message: "Product not found",
+      });
+    }
+    return res.status(200).send({
+      success: true,
+      message: "Product deleted successfully",
+    });
+  } catch (error) {
+    return res.status(500).send({
+      success: false,
+      message: error.message,
+    });
+  }
 };
