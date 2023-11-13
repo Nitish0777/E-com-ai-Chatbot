@@ -8,9 +8,6 @@ const connectDB = async () => {
     })
     .then(() => {
       console.log(`Database connected successfully`.cyan.underline);
-    })
-    .catch((err) => {
-      console.log(err);
     });
 };
 
