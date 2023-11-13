@@ -6,7 +6,7 @@ const errorMiddleware = (err, req, res, next) => {
 
   res.status(err.statusCode).send({
     success: false,
-    error: err,
+    message: err.message,
   });
 };
 
