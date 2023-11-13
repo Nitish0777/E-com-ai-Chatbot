@@ -1,4 +1,4 @@
-                                                    ## Hii EveryOne
+                                                     Hii EveryOne
 ## Overview
 
 This project is an e-commerce website built using the MERN (MongoDB, Express.js, React, Node.js) stack, with the integration of a chatbot powered by Dialogflow and FastAPI. The combination of these technologies allows for a robust and interactive online shopping experience.
