@@ -1,6 +1,7 @@
 import Products from "../models/productModel.js";
 import ErrorHandler from "../utils/errorHandler.js";
 import catchErrors from "../middleware/catchAsyncErrors.js";
+import ApiFeatures from "../utils/apifeatures.js";
 
 // Create new product
 export const createProduct = catchErrors(async (req, res) => {
@@ -18,8 +19,9 @@ export const createProduct = catchErrors(async (req, res) => {
 // Get all products
 
 export const getAllProducts = catchErrors(async (req, res) => {
-  const products = await Products.find({});
-  if (!product) {
+  const apiFeature = new ApiFeatures(Products.find(), req.query).search();
+  const products = await apiFeature.query;
+  if (!products) {
     return next(new ErrorHandler("Product not found", 404));
   }
   return res.status(200).send({
