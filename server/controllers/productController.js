@@ -5,6 +5,7 @@ import ApiFeatures from "../utils/apifeatures.js";
 
 // Create new product
 export const createProduct = catchErrors(async (req, res) => {
+  req.body.user = req.user.id;
   const product = await Products.create(req.body);
   if (!product) {
     return next(new ErrorHandler("Issue in creating Product", 404));
@@ -76,6 +77,6 @@ export const getProductDetails = catchErrors(async (req, res, next) => {
     success: true,
     message: "Single Product Detail Get successfully",
     product,
-    // productCount, 
+    // productCount,
   });
 });
