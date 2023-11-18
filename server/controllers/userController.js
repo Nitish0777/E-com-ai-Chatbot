@@ -1,6 +1,7 @@
 import ErrorHandler from "../utils/errorHandler.js";
 import catchErrors from "../middleware/catchAsyncErrors.js";
 import User from "../models/userModel.js";
+import sendToken from "../utils/jwtToken.js";
 
 //Register a user
 export const registerUser = catchErrors(async (req, res, next) => {
@@ -17,11 +18,7 @@ export const registerUser = catchErrors(async (req, res, next) => {
   if (!user) {
     return next(new ErrorHandler("Issue in creating User", 404));
   }
-  const token = user.getJwtToken();
-  return res.status(201).send({
-    success: true,
-    token,
-  });
+  sendToken(user, 201, res);
 });
 
 export const loginUser = catchErrors(async (req, res, next) => {
@@ -41,9 +38,5 @@ export const loginUser = catchErrors(async (req, res, next) => {
   if (!isPasswordMatched) {
     return next(new ErrorHandler("Invalid Email or Password", 401));
   }
-  const token = user.getJwtToken();
-  return res.status(200).send({
-    success: true,
-    token,
-  });
+  sendToken(user, 200, res);
 });
