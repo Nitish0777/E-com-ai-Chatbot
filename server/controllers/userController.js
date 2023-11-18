@@ -60,7 +60,7 @@ export const forgotPassword = catchErrors(async (req, res, next) => {
   if (!user) {
     return next(new ErrorHandler("User not found with this email", 404));
   }
-  // Get reset token
+  // Get re set token
   const resetToken = user.getResetPasswordToken();
   await user.save({ validateBeforeSave: false });
 
@@ -88,4 +88,38 @@ export const forgotPassword = catchErrors(async (req, res, next) => {
     await user.save({ validateBeforeSave: false });
     return next(new ErrorHandler(error.message, 500));
   }
+});
+
+// Reset password   =>   /api/v1/password/reset/:token
+export const resetPassword = catchErrors(async (req, res, next) => {
+  // Hash URL token
+  const resetPasswordToken = crypto
+    .createHash("sha256")
+    .update(req.params.token)
+    .digest("hex");
+  const user = await User.findOne({
+    resetPasswordToken,
+    resetPasswordExpire: { $gt: Date.now() },
+  });
+  if (!user) {
+    return next(
+      new ErrorHandler(
+        "Password reset token is invalid or has been expired",
+        400
+      )
+    );
+  }
+  if (req.body.password !== req.body.confirmPassword) {
+    return next(new ErrorHandler("Password does not match", 400));
+  }
+
+  if (req.body.password !== req.body.confirmPassword) {
+    return next(new ErrorHandler("Password does not match", 400));
+  }
+  // Setup the new password
+  user.password = req.body.password;
+  user.resetPasswordToken = undefined;
+  user.resetPasswordExpire = undefined;
+  await user.save();
+  sendToken(user, 200, res);
 });
