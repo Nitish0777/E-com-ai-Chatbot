@@ -4,10 +4,12 @@ import User from "../models/userModel.js";
 import sendToken from "../utils/jwtToken.js";
 import { sendEmail } from "../utils/sendEmail.js";
 import crypto from "crypto";
+import exp from "constants";
 
 //Register a user
 export const registerUser = catchErrors(async (req, res, next) => {
   const { name, email, password } = req.body;
+
   const user = await User.create({
     name,
     email,
@@ -123,4 +125,16 @@ export const resetPassword = catchErrors(async (req, res, next) => {
   user.resetPasswordExpire = undefined;
   await user.save();
   sendToken(user, 200, res);
+});
+
+//get user Details
+export const getUserDetails = catchErrors(async (req, res, next) => {
+  const user = await User.findById(req.user.id);
+  if (!user) {
+    return next(new ErrorHandler("User not found", 404));
+  }
+  res.status(200).json({
+    success: true,
+    user,
+  });
 });
