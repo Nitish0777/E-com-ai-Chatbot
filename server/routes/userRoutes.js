@@ -7,6 +7,7 @@ import {
   resetPassword,
   getUserDetails,
   updatePassword,
+  updateProfile,
 } from "../controllers/userController.js";
 import { isAuthenticatedUser } from "../middleware/auth.js";
 
@@ -25,5 +26,7 @@ router.route("/logout").get(logoutUser);
 router.route("/me").get(isAuthenticatedUser, getUserDetails);
 
 router.route("/password/update").put(isAuthenticatedUser, updatePassword);
+
+router.route("/me/update").put(isAuthenticatedUser, updateProfile);
 
 export default router;
