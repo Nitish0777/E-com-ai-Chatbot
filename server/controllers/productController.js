@@ -80,3 +80,90 @@ export const getProductDetails = catchErrors(async (req, res, next) => {
     // productCount,
   });
 });
+
+// Create new review or update the review
+export const createProductReview = catchErrors(async (req, res, next) => {
+  const { rating, comment, productId } = req.body;
+  const review = {
+    user: req.user.id,
+    name: req.user.name,
+    rating: Number(rating),
+    comment,
+  };
+  const product = await Products.findById(productId);
+  if (!product) {
+    return next(new ErrorHandler("Product not found", 404));
+  }
+  const isReviewed = product.reviews.find(
+    (r) => r.user.toString() === req.user.id.toString()
+  );
+  if (isReviewed && isReviewed.length > 0) {
+    product.reviews.forEach((review) => {
+      if (review.user.toString() === req.user.id.toString()) {
+        review.comment = comment;
+        review.rating = rating;
+      }
+    });
+  } else {
+    product.reviews.push(review);
+    product.numOfReviews = product.reviews.length;
+  }
+  let avg = 0;
+  product.reviews.forEach((review) => {
+    avg += review.rating;
+  });
+  product.ratings = avg / product.reviews.length;
+  await product.save({ validateBeforeSave: false });
+  return res.status(200).send({
+    success: true,
+    message: "Review added successfully",
+  });
+});
+
+//get all reviews of a product
+export const getProductReviews = catchErrors(async (req, res, next) => {
+  const product = await Products.findById(req.query.id);
+  if (!product) {
+    return next(new ErrorHandler("Product not found", 404));
+  }
+  return res.status(200).send({
+    success: true,
+    message: "Reviews retrieved successfully",
+    reviews: product.reviews,
+  });
+});
+
+//Delete product review
+export const deleteReview = catchErrors(async (req, res, next) => {
+  const product = await Products.findById(req.query.productId);
+  if (!product) {
+    return next(new ErrorHandler("Product not found", 404));
+  }
+  const reviews = product.reviews.filter(
+    (review) => review._id.toString() !== req.query.id.toString()
+  );
+  let avg = 0;
+  reviews.forEach((review) => {
+    avg += review.rating;
+  });
+  product.ratings = avg / reviews.length;
+  product.reviews = reviews;
+  product.numOfReviews = reviews.length;
+  await Products.findByIdAndUpdate(
+    req.query.productId,
+    {
+      reviews,
+      ratings: avg / reviews.length,
+      numOfReviews: reviews.length,
+    },
+    {
+      new: true,
+      runValidators: true,
+      useFindAndModify: false,
+    }
+  );
+  return res.status(200).send({
+    success: true,
+    message: "Review deleted successfully",
+  });
+});
