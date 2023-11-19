@@ -172,3 +172,58 @@ export const updateProfile = catchErrors(async (req, res, next) => {
     user,
   });
 });
+
+//get all users (admin)
+export const getAllUsers = catchErrors(async (req, res, next) => {
+  const users = await User.find();
+  if (!users) {
+    return next(new ErrorHandler("User not found", 404));
+  }
+  res.status(200).json({
+    success: true,
+    users,
+  });
+});
+
+//get single users (admin)
+export const getSingleUser = catchErrors(async (req, res, next) => {
+  const users = await User.findById(req.params.id);
+  if (!users) {
+    return next(new ErrorHandler("User not found", 404));
+  }
+  res.status(200).json({
+    success: true,
+    users,
+  });
+});
+
+//update user Role
+export const updateUserRole = catchErrors(async (req, res, next) => {
+  const newUserData = {
+    name: req.body.name,
+    email: req.body.email,
+    role: req.body.role,
+  };
+  const user = await User.findByIdAndUpdate(req.params.id, newUserData, {
+    new: true,
+    runValidators: true,
+    useFindAndModify: false,
+  });
+  res.status(200).json({
+    success: true,
+    user,
+  });
+});
+
+//delete user --admin
+export const deleteUser = catchErrors(async (req, res, next) => {
+  const user = await User.findById(req.params.id);
+  if (!user) {
+    return next(new ErrorHandler("User not found", 404));
+  }
+  await User.findByIdAndDelete(req.params.id);
+  res.status(200).json({
+    success: true,
+    message: "User deleted successfully",
+  });
+});
