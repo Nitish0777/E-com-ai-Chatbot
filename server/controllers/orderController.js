@@ -59,3 +59,73 @@ export const myOrders = catchErrors(async (req, res, next) => {
     orders,
   });
 });
+
+// Get all orders - ADMIN  =>   /api/v1/admin/orders/
+export const allOrders = catchErrors(async (req, res, next) => {
+  const orders = await Order.find();
+
+  let totalAmount = 0;
+
+  orders.forEach((order) => {
+    totalAmount += order.totalPrice;
+  });
+
+  res.status(200).json({
+    success: true,
+    totalAmount,
+    orders,
+  });
+});
+
+// Update / Process order - ADMIN  =>   /api/v1/admin/order/:id
+export const updateOrder = catchErrors(async (req, res, next) => {
+  const order = await Order.findById(req.params.id);
+
+  if (!order) {
+    return next(new ErrorHandler("No Order found with this ID", 404));
+  }
+
+  if (order.orderStatus === "Delivered") {
+    return next(new ErrorHandler("You have already delivered this order", 400));
+  }
+
+  order.orderItems.forEach(async (item) => {
+    await updateStock(item.product, item.quantity);
+  });
+
+  order.orderStatus = req.body.status;
+
+  if (req.body.status === "Delivered") {
+    order.deliveredAt = Date.now();
+  }
+
+  await order.save({ validateBeforeSave: false });
+
+  res.status(200).json({
+    success: true,
+  });
+});
+
+// Update stock function
+async function updateStock(id, quantity) {
+  const product = await Products.findById(id);
+
+  product.stock = product.stock - quantity;
+
+  await product.save({ validateBeforeSave: false });
+}
+
+// Delete order   =>   /api/v1/admin/order/:id
+export const deleteOrder = catchErrors(async (req, res, next) => {
+  const order = await Order.findById(req.params.id);
+
+  if (!order) {
+    return next(new ErrorHandler("No Order found with this ID", 404));
+  }
+
+  await Order.findByIdAndDelete(req.params.id);
+
+  res.status(200).json({
+    success: true,
+  });
+});
